@@ -1,4 +1,4 @@
-# DimMA Preheater 🔥💡
+# DimMA Preheater
 
 grandMA3-Plugin, das per Knopfdruck einen eigenen **Dimmer-Fixture-Type** (8 bit oder 16 bit) mit einstellbarem **Preheat** und **Limit** erstellt – ohne Vorlage, ohne manuelles Importieren.
 
