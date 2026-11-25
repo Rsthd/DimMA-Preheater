@@ -40,11 +40,9 @@ Aufbau des DMX-Kanals:
 
 ```
 DMX-Kanal (Coarse, bei 16 bit + Fine)
-├─ LogicalChannel Dimmer
-│    └─ "Dimmer"      Preheat … Limit   → Dimmer 0 … 100 %
-└─ LogicalChannel NoFeature   (nur wenn nötig)
-     ├─ "Off"         0 … Preheat-1
-     └─ "Over Limit"  Limit+1 … Max
+└─ LogicalChannel Dimmer
+     ├─ "Dimmer"      Preheat … Limit   → Dimmer 0 … 100 %
+     └─ "Over Limit"  Limit+1 … Max     (NoFeature, nur wenn Limit < 100 %)
 ```
 
 ## Hinweise

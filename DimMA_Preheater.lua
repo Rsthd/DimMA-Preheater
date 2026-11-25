@@ -14,12 +14,9 @@
        Import <Nr> /File "..." /Path "..." auf die nächste freie Nummer
        importiert (Fallback: Lua-Import über Acquire():Import()).
 
-  Der DMX-Kanal enthält:
-    LogicalChannel "Dimmer":
+  Der DMX-Kanal enthält einen LogicalChannel "Dimmer":
       "Dimmer"     Preheat .. Limit  (hier läuft der Dimmer 0..100 %)
-    LogicalChannel "NoFeature" (Reserve, nur wenn nötig):
-      "Off"        0 .. Preheat-1    (wenn Preheat > 0)
-      "Over Limit" Limit+1 .. Max    (wenn Limit < 100)
+      "Over Limit" Limit+1 .. Max    (NoFeature, nur wenn Limit < 100)
 
   Aufruf:
     Plugin "DimMA Preheater"             -> Dialog
@@ -90,11 +87,10 @@ local function buildXml(name, bits, preheatPct, limitPct)
   local preheatHex = dmxToHex(preheatDmx, bits)
   local limitHex   = dmxToHex(limitDmx, bits)
 
-  -- Der Dimmer bekommt einen eigenen LogicalChannel mit genau EINER
-  -- ChannelFunction. So zeigt die Encoder-Bar nur den Wert (z. B. "50")
-  -- statt "Bereich:Wert" (z. B. "2:50").
-  -- Die Reserve-Bereiche unter Preheat / über Limit liegen in einem
-  -- separaten LogicalChannel mit Attribut NoFeature.
+  -- Ein LogicalChannel. "Dimmer" ist die ERSTE ChannelFunction und startet
+  -- direkt beim Preheat-Wert (kein extra Bereich darunter), damit die
+  -- Encoder-Bar nur den Wert zeigt (z. B. "50") statt "2:50".
+  -- Über dem Limit folgt nur bei Bedarf ein Reserve-Bereich (NoFeature).
   local ind = "                        "
   local cfInd = ind .. "    "
 
@@ -103,26 +99,13 @@ local function buildXml(name, bits, preheatPct, limitPct)
     '<ChannelFunction Name="Dimmer" Attribute="Dimmer"%s Default="%s"/>\n',
     (preheatDmx > 0) and (' DMXFrom="' .. preheatHex .. '"') or "",
     preheatHex)
-  cfXml = cfXml .. ind .. '</LogicalChannel>\n'
-
-  local reserve = {}
-  if preheatDmx > 0 then
-    reserve[#reserve + 1] =
-      '<ChannelFunction Name="Off" Attribute="NoFeature" Default="000000"/>'
-  end
   if limitDmx < maxDmx then
     local highHex = dmxToHex(limitDmx + 1, bits)
-    reserve[#reserve + 1] = string.format(
-      '<ChannelFunction Name="Over Limit" Attribute="NoFeature" DMXFrom="%s" Default="%s"/>',
+    cfXml = cfXml .. cfInd .. string.format(
+      '<ChannelFunction Name="Over Limit" Attribute="NoFeature" DMXFrom="%s" Default="%s"/>\n',
       highHex, highHex)
   end
-  if #reserve > 0 then
-    cfXml = cfXml .. ind .. '<LogicalChannel Attribute="NoFeature">\n'
-    for _, f in ipairs(reserve) do
-      cfXml = cfXml .. cfInd .. f .. "\n"
-    end
-    cfXml = cfXml .. ind .. '</LogicalChannel>\n'
-  end
+  cfXml = cfXml .. ind .. '</LogicalChannel>\n'
 
   local channelOffsets = (bits == 16) and 'Coarse="1" Fine="2"' or 'Coarse="1"'
 
