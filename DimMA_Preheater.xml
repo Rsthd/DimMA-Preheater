@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GMA3 DataVersion="1.9.3.3">
+	<Plugin Name="DimMA Preheater" Version="1.0.0.0">
+		<ComponentLua Name="DimMA_Preheater" FileName="DimMA_Preheater.lua" />
+	</Plugin>
+</GMA3>
