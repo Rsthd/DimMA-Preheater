@@ -56,7 +56,9 @@ end
 local function dmxToHex(value, bits)
   local v24
   if bits == 16 then
-    v24 = round(value * 16777215 / 65535)
+    -- exakt auf den Anfang des 16-bit-Schritts legen (letztes Byte 00),
+    -- sonst liegt 0 % knapp unterhalb des Dimmer-Bereichs
+    v24 = value * 256
   else
     v24 = value * 65793 -- 0x010101
   end
